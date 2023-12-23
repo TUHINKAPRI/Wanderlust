@@ -1,18 +1,45 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link ,useNavigate} from "react-router-dom";
+import axios from "axios";
 function SignUp() {
-  let[formData,setFormData]=useState({username:'',password:'',email:''})
+  let navigate=useNavigate()
+  let [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    email: "",
+  });
+  let [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   function changeHandler(e) {
-    setFormData((prev)=>{
-      return({
-        ...prev,[e.target.name]:e.target.value
-      })
-    })
+    setFormData((prev) => {
+      return {
+        ...prev,
+        [e.target.name]: e.target.value,
+      };
+    });
   }
-  function clickHandler(e){
-    e.preventDefault()
+
+  async function clickHandler(e) {
+    e.preventDefault();
     console.log(formData);
+    try {
+      setIsLoading(true);
+      const res = await axios.post(
+        "http://127.0.0.1:3000/api/v1/user/sign-up",
+        formData
+      );
+      console.log(res);
+      setIsLoading(false);
+      setError(null)
+      navigate('/log-in')
+    } catch (err) {
+      console.log(err.response.data);
+
+      setError(err.response.data.messaage);
+      setIsLoading(false);
+    }
   }
+  console.log(error);
 
   return (
     <div className="max-w-lg mx-auto">
@@ -42,16 +69,21 @@ function SignUp() {
           value={formData.password}
           onChange={changeHandler}
         />
-        <button className="bg-slate-700 text-white p-3 rounded-lg" onClick={clickHandler}>
-          Sign-Up
+        <button
+          className="bg-slate-700 text-white p-3 rounded-lg"
+          disabled={isLoading}
+          onClick={clickHandler}
+        >
+          {isLoading ? "Loading..." : "SignUp"}
         </button>
       </form>
       <div className="flex mt-5">
         <p>Have a account?</p>
-        <Link to="/login">
+        <Link to="/log-in">
           <p className="text-blue-700">Login</p>
         </Link>
       </div>
+      {error ? <p className="bg-red-800">{error}</p> : ""}
     </div>
   );
 }
