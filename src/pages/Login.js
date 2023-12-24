@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "../redux/slices/userSlices";
 import axios from "axios";
+import OAuth from "../components/OAuth";
 function Login() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const value = useSelector((state) => state.user);
+  console.log(value);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   function changeHandler(e) {
     setFormData((prev) => {
       return {
@@ -17,17 +26,15 @@ function Login() {
   async function clickHandler(e) {
     e.preventDefault();
     try {
-      setIsLoading(true);
+      dispatch(signInStart());
       const res = await axios.post(
         "http://localhost:3000/api/v1/user/log-in",
         formData
       );
-      navigate("/home");
-      setError(null);
-      setIsLoading(false);
+      dispatch(signInSuccess(res));
+      navigate("/");
     } catch (err) {
-      setError(err.response.data.message);
-      setIsLoading(false);
+      dispatch(signInFailure(err.response));
     }
   }
   return (
@@ -50,21 +57,23 @@ function Login() {
         />
         <button
           onClick={clickHandler}
-          disabled={isLoading}
+          disabled={value.isLoading}
           className="bg-slate-700 text-white p-3 rounded-lg"
         >
-          {isLoading ? "Loading..." : "Login"}
+          {value?.isLoading ? "Loading..." : "Login"}
         </button>
+        <OAuth/>
       </form>
       <div>
         <p>
           Don't have an account ?
           <span>
             <Link to="/sign-up" className="text-blue-700">
-              SignUp
+             signUp
             </Link>
-          </span>{" "}
+          </span>
         </p>
+        <p>{value.error?.data.message}</p>
       </div>
     </div>
   );

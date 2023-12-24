@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link ,useNavigate} from "react-router-dom";
 import axios from "axios";
+import OAuth from "../components/OAuth";
 function SignUp() {
   let navigate=useNavigate()
   let [formData, setFormData] = useState({
@@ -76,6 +77,7 @@ function SignUp() {
         >
           {isLoading ? "Loading..." : "SignUp"}
         </button>
+        <OAuth/>
       </form>
       <div className="flex mt-5">
         <p>Have a account?</p>
